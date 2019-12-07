@@ -1,3 +1,4 @@
+import shutil
 import sys
 import os
 import argparse
@@ -44,7 +45,7 @@ class Options(argparse.ArgumentParser):
         so = SnakemakeOptions(working_directory=NAME)
         so.add_options(self)
 
-        so = InputOptions()
+        so = InputOptions(input_pattern="*.bed")
         so.add_options(self)
 
         so = GeneralOptions()
@@ -52,8 +53,26 @@ class Options(argparse.ArgumentParser):
 
         pipeline_group = self.add_argument_group("pipeline")
 
-        pipeline_group.add_argument("--TODO", dest="TODO", default=4, type=int)
-        
+        pipeline_group.add_argument("-o", "--circular", action="store_true")
+        pipeline_group.add_argument("--double-threshold", default=0.5)
+        pipeline_group.add_argument("--genbank", default=None,
+            help="the genbank to annotate the events found")
+        pipeline_group.add_argument("--reference", default=None,
+            help="the genome reference used to plot GC content")
+        pipeline_group.add_argument("--high-threshold", default=4)
+        pipeline_group.add_argument("--low-threshold", default=-4)
+        pipeline_group.add_argument("--mixture-models", default=2, type=int,
+            help="""Number of models to use in the mixture model. (default 2).
+                 No need to change this value. Possibly, you may want to set 
+                 to 1 or 3 in some rate occasions. """)
+        pipeline_group.add_argument("--window", default=20000, type=int, 
+            help="""Length of the running median window. Keep to 20000 as much as
+            possible. This allows the detection of CNV up to 10kb. If longer
+            event are present, increase this window size.""")
+        pipeline_group.add_argument("--chunksize", default=5000000, type=int)
+        pipeline_group.add_argument("--binning", default=-1, type=int)
+        pipeline_group.add_argument("--cnv-clustering", default=-1)
+
 
 def main(args=None):
 
@@ -69,9 +88,40 @@ def main(args=None):
 
     # fill the config file with input parameters
     cfg = manager.config.config
-    # EXAMPLE TOREPLACE WITH YOUR NEEDS
-    cfg.TODO = os.path.abspath(options.working_directory)
-    cfg.YOURSECTION.TODO = options.TODO
+
+    cfg.input_directory = os.path.abspath(options.input_directory)
+    cfg.input_pattern = options.input_pattern
+
+
+    cfg.coverage.circular = options.circular
+    cfg.coverage.double_threshold = options.double_threshold
+
+    if options.genbank:
+        genbank = os.path.abspath(options.genbank)
+        cfg.coverage.genbank_file = genbank
+        if os.path.exists(genbank):
+            shutil.copy(genbank, manager.workdir)
+        else:
+            raise IOError("{} not found".format(options.genbank))
+
+    if options.reference:
+        reference = os.path.abspath(options.reference)
+        cfg.coverage.reference_file = reference
+        if os.path.exists(reference):
+            shutil.copy(reference, manager.workdir)
+        else:
+            raise IOError("{} not found".format(options.reference))
+
+    cfg.coverage.high_threshold = options.high_threshold
+    cfg.coverage.low_threshold = options.low_threshold
+    cfg.coverage.mixture_models = options.mixture_models
+    cfg.coverage.window = options.window
+    cfg.coverage.chunksize = options.chunksize
+    cfg.coverage.binning = options.binning
+    cfg.coverage.cnv_clustering = options.cnv_clustering
+
+
+
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
