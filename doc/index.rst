@@ -3,10 +3,14 @@ Sequana coverage pipeline documentation
 
 |version|, |today|, status: production
 
-The **coverage** pipeline is a `Sequana <https://github.com/sequana/sequana>`_ pipeline. You can find the source code 
+We strongly recommend to first test the standalone **sequana_coverage**,
+already in the **Sequana** suite. If this is not fast enough, then this 
+pipeline may be useful.
+
+The **coverage** pipeline is a `Sequana <https://github.com/sequana/sequana>`_ pipeline. You can find the source code
 on  `https://github.com/sequana/sequana_coverage <https://github.com/sequana/sequana_coverage/>`_. Would you have issues
-about the code, usage or lack of information, please fill a report 
-on `Sequana itself <https://github.com/sequana/sequana/issues>`_ indicating the pipeline name (We centralized all 
+about the code, usage or lack of information, please fill a report
+on `Sequana itself <https://github.com/sequana/sequana/issues>`_ indicating the pipeline name (We centralized all
 pipelines issues on **Sequana** repository only so as to be more responsive).
 
 If you use **Sequana**, please do not forget to cite us:
