@@ -8,8 +8,15 @@ This is is the **coverage** pipeline from the `Sequana <https://sequana.readthed
 :Output: a set of HTML reports for each chromosomes and a multiqc report
 :Status: production
 :Citation: 
-    - Sequana coverage (https://doi.org/10.1101/092478)
-    - Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
+    Dimitri Desvillechabrol, Christiane Bouchier, Sean Kennedy, Thomas Cokelaer
+    *Sequana coverage: detection and characterization of genomic variations 
+    using running median and mixture models*
+    GigaScience, Volume 7, Issue 12, December 2018, giy110, 
+    https://doi.org/10.1093/gigascience/giy110
+
+    and 
+
+    Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI https://doi:10.21105/joss.00352
 
 
 Installation
@@ -35,7 +42,27 @@ Usage
     sequana_pipelines_coverage --help
     sequana_pipelines_coverage --input-directory DATAPATH 
 
-This creates a directory with the pipeline and configuration file. You will then need 
+By default, this looks for BED file. WARNING. This are BED3 meaning a 3-columns
+tabulated file like this one::
+
+    chr1 1 10
+    chr1 2 11
+    ...
+    chr1 N1 10
+    chr2 1 20
+    chr2 2 21
+    ...
+    chr2 N2 20
+
+where the first column stored the chromosome name, the second is the position
+and the third is the coverage itself. See sequana_coverage documentation for
+details. If you have BAM files as input, we will do the conversion for you. In
+such case, use this option::
+
+    --input-pattern "*.bam"
+
+The sequana_pipelines_coverage script creates a directory with the pipeline and 
+its configuration file. You will then need 
 to execute the pipeline::
 
     cd coverage
@@ -64,16 +91,15 @@ or::
 You are ready to go. Save the project and press Run. Once done, open the HTML report.
 
 
-
-
 Requirements
 ~~~~~~~~~~~~
 
 This pipelines requires the following executable(s):
 
 - sequana_coverage from **Sequana**, which should be installed automatically.
+- multiqc
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_coverage/master/sequana_pipelines/coverage/dag.png
+.. .. image:: https://raw.githubusercontent.com/sequana/sequana_coverage/master/sequana_pipelines/coverage/dag.png
 
 
 Details

@@ -8,3 +8,7 @@ is also possible):
     # the previous command creates a BAM file
     samtools depth -aa PREV_OUTPUT > JB409847.bed
 
+I edited to the genbank, fasta and bed to simpligy the name as JB409847.
+
+I copied the file into a new file only changing the chromosome name (adding a
+_bis suffix) just for testing

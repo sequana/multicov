@@ -44,7 +44,6 @@ rule multiqc:
     shell: "multiqc . -m sequana_coverage  -f -c {params.config}"
 
 
-
 # The main coverage factory
 rule coverage:
     input: __coverage__input
@@ -60,8 +59,24 @@ rule coverage:
     run:
         sm.message("Scanning input file. May take time depending on the input file")
 
-        genome = GenomeCov(input[0])
+        cfg = config['coverage']
+        genbank = cfg['genbank_file']
+        reference = cfg['reference_file']
 
+        if genbank and os.path.exists(genbank):
+            pass
+        else:
+            print("Input genbank {} does not exists".format(genbank))
+            genbank = None
+
+        genome = GenomeCov(input[0], genbank, cfg['low_threshold'],
+                           cfg['high_threshold'],
+                           cfg['double_threshold'],
+                           cfg['double_threshold'],
+                           chunksize=cfg['chunksize'])
+
+        if reference and os.path.exists(reference):
+            genome.compute_gc_content(reference, 201, cfg['circular'])
 
         for index in range(len(genome.chr_list)):
             chromosome = genome.chr_list[index]

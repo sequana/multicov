@@ -18,6 +18,16 @@ If you use **Sequana**, please do not forget to cite us:
     Cokelaer et al, (2017), 'Sequana': a Set of Snakemake NGS pipelines, Journal of
     Open Source Software, 2(16), 352, `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105/joss.00352>`_
 
+This pipeline has also its own citation:
+
+    Dimitri Desvillechabrol, Christiane Bouchier, Sean Kennedy, Thomas Cokelaer
+    *Sequana coverage: detection and characterization of genomic variations 
+    using running median and mixture models*
+    GigaScience, Volume 7, Issue 12, December 2018, giy110, 
+    https://doi.org/10.1093/gigascience/giy110
+
+
+
 .. contents::
    :depth: 2
 
