@@ -3,40 +3,24 @@ import sys
 import os
 import argparse
 
-from sequana.pipelines_common import *
-from sequana.snaketools import Module
-from sequana import logger
-logger.level = "INFO"
+from sequana_pipetools.options import *
+from sequana_pipetools.misc import Colors
+from sequana_pipetools.info import sequana_epilog, sequana_prolog
 
 col = Colors()
 
 NAME = "coverage"
-m = Module(NAME)
-m.is_executable()
+
+
 
 
 class Options(argparse.ArgumentParser):
-    def __init__(self, prog=NAME):
-        usage = col.purple(
-            """This script prepares the sequana pipeline coverage layout to
-            include the Snakemake pipeline and its configuration file ready to
-            use.
-
-            In practice, it copies the config file and the pipeline into a
-            directory (coverage) together with an executable script
-
-            For a local run, use :
-
-                sequana_pipelines_coverage --input-directory PATH_TO_DATA --run-mode local
-
-            For a run on a SLURM cluster:
-
-                sequana_pipelines_coverage --input-directory PATH_TO_DATA --run-mode slurm
-
-        """
+    def __init__(self, prog=NAME, epilog=None):
+        usage = col.purple(sequana_prolog.format(**{"name": NAME}))
+        super(Options, self).__init__(usage=usage, prog=prog, description="",
+            epilog=epilog,
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
-        super(Options, self).__init__(usage=usage, prog=prog, description="")
-
         # add a new group of options to the parser
         so = SlurmOptions()
         so.add_options(self)
@@ -73,52 +57,74 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--binning", default=-1, type=int)
         pipeline_group.add_argument("--cnv-clustering", default=-1)
 
+    def parse_args(self, *args):
+        args_list = list(*args)
+        if "--from-project" in args_list:
+            if len(args_list)>2:
+                msg = "WARNING [sequana]: With --from-project option, " + \
+                        "pipeline and data-related options will be ignored."
+                print(col.error(msg))
+            for action in self._actions:
+                if action.required is True:
+                    action.required = False
+        options = super(Options, self).parse_args(*args)
+        return options
 
 def main(args=None):
 
     if args is None:
         args = sys.argv
 
-    options = Options(NAME).parse_args(args[1:])
+    # whatever needs to be called by all pipeline before the options parsing
+    from sequana_pipetools.options import before_pipeline
+    before_pipeline(NAME)
 
-    manager = PipelineManager(options, NAME)
+    # option parsing including common epilog
+    options = Options(NAME, epilog=sequana_epilog).parse_args(args[1:])
+
+
+    from sequana.pipelines_common import SequanaManager
+
+    # the real stuff is here
+    manager = SequanaManager(options, NAME)
 
     # create the beginning of the command and the working directory
     manager.setup()
 
     # fill the config file with input parameters
-    cfg = manager.config.config
+    if options.from_project is None:
+        cfg = manager.config.config
 
-    cfg.input_directory = os.path.abspath(options.input_directory)
-    cfg.input_pattern = options.input_pattern
+        cfg.input_directory = os.path.abspath(options.input_directory)
+        cfg.input_pattern = options.input_pattern
 
 
-    cfg.coverage.circular = options.circular
-    cfg.coverage.double_threshold = options.double_threshold
+        cfg.coverage.circular = options.circular
+        cfg.coverage.double_threshold = options.double_threshold
 
-    if options.genbank:
-        genbank = os.path.abspath(options.genbank)
-        cfg.coverage.genbank_file = genbank
-        if os.path.exists(genbank):
-            shutil.copy(genbank, manager.workdir)
-        else:
-            raise IOError("{} not found".format(options.genbank))
+        if options.genbank:
+            genbank = os.path.abspath(options.genbank)
+            cfg.coverage.genbank_file = genbank
+            if os.path.exists(genbank):
+                shutil.copy(genbank, manager.workdir)
+            else:
+                raise IOError("{} not found".format(options.genbank))
 
-    if options.reference:
-        reference = os.path.abspath(options.reference)
-        cfg.coverage.reference_file = reference
-        if os.path.exists(reference):
-            shutil.copy(reference, manager.workdir)
-        else:
-            raise IOError("{} not found".format(options.reference))
+        if options.reference:
+            reference = os.path.abspath(options.reference)
+            cfg.coverage.reference_file = reference
+            if os.path.exists(reference):
+                shutil.copy(reference, manager.workdir)
+            else:
+                raise IOError("{} not found".format(options.reference))
 
-    cfg.coverage.high_threshold = options.high_threshold
-    cfg.coverage.low_threshold = options.low_threshold
-    cfg.coverage.mixture_models = options.mixture_models
-    cfg.coverage.window = options.window
-    cfg.coverage.chunksize = options.chunksize
-    cfg.coverage.binning = options.binning
-    cfg.coverage.cnv_clustering = options.cnv_clustering
+        cfg.coverage.high_threshold = options.high_threshold
+        cfg.coverage.low_threshold = options.low_threshold
+        cfg.coverage.mixture_models = options.mixture_models
+        cfg.coverage.window_size = options.window
+        cfg.coverage.chunksize = options.chunksize
+        cfg.coverage.binning = options.binning
+        cfg.coverage.cnv_clustering = options.cnv_clustering
 
 
 

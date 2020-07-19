@@ -21,7 +21,7 @@ def test_standalone_subprocess():
 def test_standalone_script():
     directory = tempfile.TemporaryDirectory()
     import sequana_pipelines.coverage.main as m
-    sys.argv = ["test", "--input-directory", directory.name, 
+    sys.argv = ["test", "--input-directory", sharedir, 
          "--force"]
     m.main()
 
