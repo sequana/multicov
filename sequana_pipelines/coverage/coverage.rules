@@ -24,10 +24,10 @@ for filename in filenames:
 
 # Some final and intermediate file patterns
 output_directory = "coverage_reports"
-prefix = output_directory + "/{sample}/"
-__multiqc__output = "multiqc_report.html"
-__coverage__output_summary = prefix + "sequana_summary_coverage.json"
-__coverage__output_rois = prefix + "rois.csv"
+#prefix = output_directory + "/{sample}/"
+__multiqc__output = "multiqc/multiqc_report.html"
+__coverage__output_summary = "coverage_reports/{sample}/sequana_summary_coverage.json"
+__coverage__output_rois = "coverage_reports/{sample}/rois.csv"
 
 
 # The pipeline itself, we need the multiqc as final result:
@@ -51,7 +51,7 @@ rule coverage:
         __coverage__output_summary,
         __coverage__output_rois
     params:
-        window=config['coverage']["window"],
+        window=config['coverage']["window_size"],
         binning=config['coverage']["binning"],
         circular=config['coverage']['circular'],
         mixture_models=config['coverage']['mixture_models'],
@@ -59,24 +59,7 @@ rule coverage:
     run:
         sm.message("Scanning input file. May take time depending on the input file")
 
-        cfg = config['coverage']
-        genbank = cfg['genbank_file']
-        reference = cfg['reference_file']
-
-        if genbank and os.path.exists(genbank):
-            pass
-        else:
-            print("Input genbank {} does not exists".format(genbank))
-            genbank = None
-
-        genome = GenomeCov(input[0], genbank, cfg['low_threshold'],
-                           cfg['high_threshold'],
-                           cfg['double_threshold'],
-                           cfg['double_threshold'],
-                           chunksize=cfg['chunksize'])
-
-        if reference and os.path.exists(reference):
-            genome.compute_gc_content(reference, 201, cfg['circular'])
+        genome = GenomeCov(input[0])
 
         for index in range(len(genome.chr_list)):
             chromosome = genome.chr_list[index]

@@ -141,3 +141,13 @@ Rules and configuration details
 Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_coverage/master/sequana_pipelines/coverage/config.yaml>`_
 to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
 
+
+Changelog
+~~~~~~~~~
+
+========= ====================================================================
+Version   Description
+========= ====================================================================
+0.9.0     * first version
+========= ====================================================================
+

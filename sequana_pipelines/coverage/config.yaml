@@ -12,8 +12,7 @@ input_directory: "%(input_directory)s"
 input_readtag: "%(input_readtag)s"
 input_pattern: "%(input_pattern)s"
 
-
-####################################"
+##############################################################################
 #
 # :Parameters:
 #
@@ -38,13 +37,16 @@ input_pattern: "%(input_pattern)s"
 #
 coverage:
     circular: True
+    window_size: 20001
+    binning: -1
+    cnv_clustering: -1
+    chunksize: 5000000
     double_threshold: 0.5
-    genbank_file:
+    gc_window_size: 201
+    annotation_file:
     high_threshold: 4.
     low_threshold: -4.
     mixture_models: 2
     reference_file:
-    window: 20001
-    chunksize: 5000000
-    binning: -1
-    cnv_clustering: -1
+
+
