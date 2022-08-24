@@ -1,34 +1,34 @@
-import easydev
 import os
-import tempfile
 import subprocess
 import sys
 
+from . import test_dir
 
-sequana_path = easydev.get_package_location('sequana_coverage')
-sharedir = os.sep.join([sequana_path , "sequana_pipelines/coverage/data"])
-annotation = sharedir + os.sep + "JB409847.gbk"
-reference = sharedir + os.sep + "JB409847.fa"
+sharedir = f"{test_dir}/data"
 
-def test_standalone_subprocess():
-    directory = tempfile.TemporaryDirectory()
-    cmd = "sequana_pipelines_coverage --input-directory {} "
+annotation = f"{test_dir}/data/JB409847.gbk"
+reference = f"{test_dir}/data/JB409847.fa"
+
+def test_standalone_subprocess(tmpdir):
+    directory = tmpdir.mkdir("wkdir")
+
+    cmd = "sequana_multicov --input-directory {} "
     cmd += "--working-directory {} --force --annotation {} "
     cmd += " --reference {} -o "
-    cmd = cmd.format(sharedir, directory.name, annotation, reference)
+    cmd = cmd.format(sharedir, directory, annotation, reference)
     subprocess.call(cmd.split())
 
-def test_standalone_script():
-    directory = tempfile.TemporaryDirectory()
-    import sequana_pipelines.coverage.main as m
+def test_standalone_script(tmpdir):
+    directory = tmpdir.mkdir("wkdir")
+    import sequana_pipelines.multicov.main as m
     sys.argv = ["test", "--input-directory", sharedir, 
          "--force"]
     m.main()
 
-def test_wrong_reference():
-    directory = tempfile.TemporaryDirectory()
-    import sequana_pipelines.coverage.main as m
-    sys.argv = ["test", "--input-directory", directory.name, 
+def test_wrong_reference(tmpdir):
+    import sequana_pipelines.multicov.main as m
+    directory = tmpdir.mkdir("wkdir")
+    sys.argv = ["test", "--input-directory", str(directory), 
         "--force", "--reference", "wrong"]
     try:
         m.main()
@@ -36,10 +36,10 @@ def test_wrong_reference():
     except IOError:
         assert True
 
-def test_wrong_genbank():
-    directory = tempfile.TemporaryDirectory()
-    import sequana_pipelines.coverage.main as m
-    sys.argv = ["test", "--input-directory", directory.name, 
+def test_wrong_genbank(tmpdir):
+    directory = tmpdir.mkdir("wkdir")
+    import sequana_pipelines.multicov.main as m
+    sys.argv = ["test", "--input-directory", str(directory), 
         "--force", "--genbank", "wrong"]
     try:
         m.main()
@@ -47,22 +47,15 @@ def test_wrong_genbank():
     except IOError:
         assert True
 
+def test_check_output(tmpdir):
+    wkdir = tmpdir.mkdir("wkdir")
 
-# For travis, you may want to add this with snakemake:
-#if "TRAVIS_PYTHON_VERSION" in os.environ:
-#    cmd += ["--snakemake-jobs", "1"]
+    # create the wokring directory and script
+    cmd = f"sequana_multicov --input-directory {test_dir}/data "
+    cmd += f"--working-directory {wkdir} --force --annotation {annotation} "
+    cmd += f" --reference {reference} -o "
+    subprocess.call(cmd.split())
 
-def test_check_output():
-
-    with tempfile.TemporaryDirectory() as wk:
-
-        # create the wokring directory and script
-        cmd = "sequana_pipelines_coverage --input-directory {} "
-        cmd += "--working-directory {} --force --annotation {} "
-        cmd += " --reference {} -o "
-        cmd = cmd.format(sharedir, wk, annotation, reference)
-        subprocess.call(cmd.split())
-
-        subprocess.call("sh coverage.sh".split(), cwd=wk)
+    subprocess.call("sh multicov.sh".split(), cwd=wkdir)
 
 

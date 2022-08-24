@@ -24,7 +24,6 @@ for filename in filenames:
 
 # Some final and intermediate file patterns
 output_directory = "coverage_reports"
-#prefix = output_directory + "/{sample}/"
 __multiqc__output = "multiqc/multiqc_report.html"
 __coverage__output_summary = "coverage_reports/{sample}/sequana_summary_coverage.json"
 __coverage__output_rois = "coverage_reports/{sample}/rois.csv"
@@ -41,7 +40,8 @@ rule multiqc:
     output: __multiqc__output
     params:
         config=sequana_data("multiqc_config.yaml", "../multiqc")
-    shell: "multiqc . -m sequana_coverage  -f -c {params.config}"
+    shell:
+        "multiqc . -m sequana_coverage  -f -c {params.config}"
 
 
 # The main coverage factory

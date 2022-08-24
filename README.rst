@@ -1,4 +1,16 @@
-This is is the **coverage** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ projet
+This is is the **coverage** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ project
+
+
+.. image:: https://badge.fury.io/py/sequana-multicov.svg
+     :target: https://pypi.python.org/pypi/sequana_multicov
+
+.. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
+    :target: http://joss.theoj.org/papers/10.21105/joss.00352
+    :alt: JOSS (journal of open source software) DOI
+
+.. image:: https://github.com/sequana/multicov/actions/workflows/main.yml/badge.svg
+   :target: https://github.com/sequana/multicov/actions/workflows    
+
 
 :Overview: Parallelised version of sequana_coverage for large eukaryotes genome.
 :Input: A set of BAM or BED files. BED file must have 3 or 4 columns. First column is
@@ -22,25 +34,19 @@ This is is the **coverage** pipeline from the `Sequana <https://sequana.readthed
 Installation
 ~~~~~~~~~~~~
 
-You must install Sequana first::
 
-    pip install sequana
+sequana_multicov is based on Python3, just install the package as follows::
 
-Then, just install this package::
+    pip install sequana_multicov --upgrade
 
-    pip install sequana_coverage
-
-This gives an executable called sequana_pipelines_coverage. Note that is should
-not be confused with the original sequana_coverage standalone from Sequana
-library. Indeed, this pipeline calls sequana_coverage behund the scene. 
 
 Usage
 ~~~~~
 
 ::
 
-    sequana_pipelines_coverage --help
-    sequana_pipelines_coverage --input-directory DATAPATH 
+    sequana_multicov --help
+    sequana_multicov --input-directory DATAPATH 
 
 By default, this looks for BED file. WARNING. This are BED3 meaning a 3-columns
 tabulated file like this one::
@@ -61,7 +67,7 @@ such case, use this option::
 
     --input-pattern "*.bam"
 
-The sequana_pipelines_coverage script creates a directory with the pipeline and 
+The sequana_coverage script creates a directory with the pipeline and 
 its configuration file. You will then need 
 to execute the pipeline::
 
@@ -99,7 +105,7 @@ This pipelines requires the following executable(s):
 - sequana_coverage from **Sequana**, which should be installed automatically.
 - multiqc
 
-.. .. image:: https://raw.githubusercontent.com/sequana/sequana_coverage/master/sequana_pipelines/coverage/dag.png
+.. .. image:: https://raw.githubusercontent.com/sequana/multicov/master/sequana_pipelines/multicov/dag.png
 
 
 Details
@@ -138,7 +144,7 @@ will convert it automatically into a BED file.
 Rules and configuration details
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_coverage/master/sequana_pipelines/coverage/config.yaml>`_
+Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/multicov/main/sequana_pipelines/multicov/config.yaml>`_
 to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
 
 
@@ -148,6 +154,8 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+1.0.0     * renamed into multicov.
+          * update to use latest sequana_pipetools (v0.9.2)
 0.9.1     * rename genbank field into annotation, window into window_size
 0.9.0     * first version
 ========= ====================================================================

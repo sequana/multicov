@@ -1,17 +1,29 @@
-import shutil
+#
+#  This file is part of Sequana software
+#
+#  Copyright (c) 2016-2021 - Sequana Development Team
+#
+#  Distributed under the terms of the 3-clause BSD license.
+#  The full license is in the LICENSE file, distributed with this software.
+#
+#  website: https://github.com/sequana/sequana
+#  documentation: http://sequana.readthedocs.io
+#
+##############################################################################
 import sys
 import os
 import argparse
+import subprocess
 
 from sequana_pipetools.options import *
+from sequana_pipetools.options import before_pipeline
 from sequana_pipetools.misc import Colors
 from sequana_pipetools.info import sequana_epilog, sequana_prolog
+from sequana_pipetools import SequanaManager
 
 col = Colors()
 
-NAME = "coverage"
-
-
+NAME = "multicov"
 
 
 class Options(argparse.ArgumentParser):
@@ -21,6 +33,7 @@ class Options(argparse.ArgumentParser):
             epilog=epilog,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
+
         # add a new group of options to the parser
         so = SlurmOptions()
         so.add_options(self)
@@ -76,14 +89,10 @@ def main(args=None):
         args = sys.argv
 
     # whatever needs to be called by all pipeline before the options parsing
-    from sequana_pipetools.options import before_pipeline
     before_pipeline(NAME)
 
     # option parsing including common epilog
     options = Options(NAME, epilog=sequana_epilog).parse_args(args[1:])
-
-
-    from sequana.pipelines_common import SequanaManager
 
     # the real stuff is here
     manager = SequanaManager(options, NAME)
