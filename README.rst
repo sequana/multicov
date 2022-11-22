@@ -154,6 +154,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+1.0.1     * set apptainer containers
 1.0.0     * renamed into multicov.
           * update to use latest sequana_pipetools (v0.9.2)
 0.9.1     * rename genbank field into annotation, window into window_size

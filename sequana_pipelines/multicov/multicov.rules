@@ -1,13 +1,26 @@
-import os, glob
-from sequana import logger as _log
-_log.level = "DEBUG"
-from sequana import GenomeCov, sequana_data
-from sequana.modules_report.coverage import CoverageModule, ChromosomeCoverageModule
-from sequana import snaketools as sm
+##############################################################################
+#
+#  Copyright (c) 2016-2021 - Sequana Dev Team (https://sequana.readthedocs.io)
+#
+#  Distributed under the terms of the 3-clause BSD license.
+#  The full license is in the LICENSE file, distributed with this software.
+#
+#  Website:       https://github.com/sequana/sequana
+#  Website:       https://github.com/sequana/fastqc
+#  Documentation: http://sequana.readthedocs.io
+#  Documentation: https://github.com/sequana/multicov/README.rst
+##############################################################################
+"""Multicov pipeline"""
+import sys
+import json
+
+from sequana_pipetools import PipelineManager
+from sequana_pipetools import snaketools as sm
+
 
 configfile: "config.yaml"
 
-manager = sm.PipelineManager("coverage", config,  fastq=False)
+manager = PipelineManager("multicov", config,  fastq=False)
 
 
 # check that the input are BED files ?
@@ -103,5 +116,7 @@ rule coverage:
 
 
 onsuccess:
-    print("DONE. Open multiqc_report.html")
+    from sequana_pipetools.errors import PipeError
+    p = PipeError("multicov")
+    p.status()
 

@@ -55,7 +55,12 @@ mapping:
             "cnv_clustering":
                 type: int
                 range: { min: -1 }
-
+            "window_size":
+                type: int
+                range: { min: -1 }
+            "gc_window_size":
+                type: int
+                range: { min: -1 }
 
 
 
