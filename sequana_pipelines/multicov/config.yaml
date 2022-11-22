@@ -8,9 +8,9 @@
 # If input_directory provided, use it otherwise if input_pattern provided,
 # use it, otherwise use input_samples.
 # ============================================================================
-input_directory: "%(input_directory)s"
-input_readtag: "%(input_readtag)s"
-input_pattern: "%(input_pattern)s"
+input_directory:
+input_readtag:
+input_pattern:
 
 ##############################################################################
 #
@@ -35,7 +35,7 @@ input_pattern: "%(input_pattern)s"
 # :param cnv_clustering: further clustering to merge detected events whose
 #     distance is smaller than this parameter
 #
-coverage:
+sequana_coverage:
     circular: True
     window_size: 20001
     binning: -1
@@ -49,4 +49,20 @@ coverage:
     mixture_models: 2
     reference_file:
 
+
+##############################################################################
+#
+#
+# - options: any multiqc options accepted. Note that if you use --comments, 
+#   it will be appended to the existing --comments added inside sequana. 
+#   By default, -p (create pictures) and -f (for overwritting) are used. 
+# - indir: The input multiqc (default is local).
+multiqc:
+    do: true
+    options: -p -f
+    input_directory: "."
+    modules: sequana_coverage    # falco is not set; the fastqc module works for falco
+    config_file:
+    resources:
+        mem: 8G
 

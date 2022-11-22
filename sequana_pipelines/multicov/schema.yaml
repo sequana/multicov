@@ -13,7 +13,7 @@ mapping:
         type: str
         required: False
 
-    "coverage":
+    "sequana_coverage":
         type: map
         mapping:
             "circular":
@@ -63,6 +63,20 @@ mapping:
                 range: { min: -1 }
 
 
-
-
+    "multiqc":
+        type: map
+        mapping:
+            "do":
+              type: bool
+            "options":
+                type: str
+            "modules":
+                type: str
+            "config_file":
+                type: str
+            "input_directory":
+                type: str
+            "resources":
+                type: any
+                required: true
 

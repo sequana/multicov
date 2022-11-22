@@ -17,6 +17,7 @@ import json
 from sequana_pipetools import PipelineManager
 from sequana_pipetools import snaketools as sm
 
+sequana_wrapper_branch="main"
 
 configfile: "config.yaml"
 
@@ -37,85 +38,59 @@ for filename in filenames:
 
 # Some final and intermediate file patterns
 output_directory = "coverage_reports"
-__multiqc__output = "multiqc/multiqc_report.html"
 __coverage__output_summary = "coverage_reports/{sample}/sequana_summary_coverage.json"
 __coverage__output_rois = "coverage_reports/{sample}/rois.csv"
 
 
 # The pipeline itself, we need the multiqc as final result:
 rule pipeline:
-    input: __multiqc__output
+    input: "multiqc/multiqc_report.html"
 
 
 # the multiqc rule that requires the JSON as input.
 rule multiqc:
-    input: expand(__coverage__output_summary, sample=chrom_names),
-    output: __multiqc__output
+    input: expand("{sample}/sequana_coverage/sequana_coverage.html", sample=manager.samples)
+    output: "multiqc/multiqc_report.html"
     params:
-        config=sequana_data("multiqc_config.yaml", "../multiqc")
-    shell:
-        "multiqc . -m sequana_coverage  -f -c {params.config}"
+        options=config['multiqc']['options'],
+        input_directory=config['multiqc']['input_directory'],
+        config_file=config['multiqc']['config_file'],
+        modules=config['multiqc']['modules']
+    log:
+       "multiqc/multiqc.log"
+    resources:
+        **config["multiqc"]["resources"]
+    wrapper:
+       f"{sequana_wrapper_branch}/wrappers/multiqc"
 
 
-# The main coverage factory
-rule coverage:
-    input: __coverage__input
+
+rule sequana_coverage:
+    input:
+        bed=manager.getrawdata(),
+        fasta=config['sequana_coverage']['reference_file']
     output:
-        __coverage__output_summary,
-        __coverage__output_rois
+        "{sample}/sequana_coverage/sequana_coverage.html"
     params:
-        window=config['coverage']["window_size"],
-        binning=config['coverage']["binning"],
-        circular=config['coverage']['circular'],
-        mixture_models=config['coverage']['mixture_models'],
-        cnv_clustering=config['coverage']['cnv_clustering'],
-    run:
-        sm.message("Scanning input file. May take time depending on the input file")
+        circular=config["sequana_coverage"]["circular"],
+        window_size=config["sequana_coverage"]["window_size"],
+        chunksize=config["sequana_coverage"]["chunksize"],
+        double_threshold=config["sequana_coverage"]["double_threshold"],
+        gc_window_size=config["sequana_coverage"]["gc_window_size"],
+        high_threshold=config["sequana_coverage"]["high_threshold"],
+        low_threshold=config["sequana_coverage"]["low_threshold"],
+        mixture_models=config["sequana_coverage"]["mixture_models"],
+        gbk=config["sequana_coverage"]["annotation_file"]
+    wrapper:
+        f"{sequana_wrapper_branch}/wrappers/sequana_coverage"
 
-        genome = GenomeCov(input[0])
-
-        for index in range(len(genome.chr_list)):
-            chromosome = genome.chr_list[index]
-
-            if params.window > len(chromosome.df) / 4:
-                NW = int(len(chromosome.df) / 4)
-                if NW % 2 == 0:
-                    NW += 1
-            else:
-                NW = params.window
-
-            # then, we run the analysis (median, zscore, rois)
-            results = chromosome.run(NW, params.mixture_models,
-                                     circular=params.circular,
-                                     binning=params.binning,
-                                     cnv_delta=params.cnv_clustering)
-            ROIs = results.get_rois()
-            summary = results.get_summary()
-
-            # and save the results
-            try: os.mkdir("coverage_reports/{}".format(chromosome.chrom_name))
-            except:pass
-            output_json = "{}/{}/sequana_summary_coverage.json".format(
-                                output_directory, chromosome.chrom_name)
-            output_roi = "{}/{}/rois.csv".format(
-                                output_directory, chromosome.chrom_name)
-
-            summary.to_json(output_json)
-            ROIs.df.to_csv(output_roi)
-
-            # Finally HTML reports
-            from sequana.utils import config as sequana_config
-            sequana_config.output_dir = "." #config['coverage']['output_directory']
-            datatable = CoverageModule.init_roi_datatable(ROIs)
-            ChromosomeCoverageModule(chromosome, datatable,
-                    options={"W": NW,
-                             "ROIs": ROIs,
-                             "k": params.mixture_models,
-                             "circular": params.circular})
-
-
+#expected_output += expand("{sample}/sequana_coverage/sequana_coverage.html", sample=manager.samples)
 
 onsuccess:
+    pass
+
+
+onerror:
     from sequana_pipetools.errors import PipeError
     p = PipeError("multicov")
     p.status()

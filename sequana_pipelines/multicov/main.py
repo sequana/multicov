@@ -126,12 +126,12 @@ def main(args=None):
         cfg.input_pattern = options.input_pattern
 
 
-        cfg.coverage.circular = options.circular
-        cfg.coverage.double_threshold = options.double_threshold
+        cfg.sequana_coverage.circular = options.circular
+        cfg.sequana_coverage.double_threshold = options.double_threshold
 
         if options.genbank:
             genbank = os.path.abspath(options.genbank)
-            cfg.coverage.genbank_file = genbank
+            cfg.sequana_coverage.genbank_file = genbank
             if os.path.exists(genbank):
                 shutil.copy(genbank, manager.workdir)
             else:
@@ -139,19 +139,19 @@ def main(args=None):
 
         if options.reference:
             reference = os.path.abspath(options.reference)
-            cfg.coverage.reference_file = reference
+            cfg.sequana_coverage.reference_file = reference
             if os.path.exists(reference):
                 shutil.copy(reference, manager.workdir)
             else:
                 raise IOError("{} not found".format(options.reference))
 
-        cfg.coverage.high_threshold = options.high_threshold
-        cfg.coverage.low_threshold = options.low_threshold
-        cfg.coverage.mixture_models = options.mixture_models
-        cfg.coverage.window_size = options.window
-        cfg.coverage.chunksize = options.chunksize
-        cfg.coverage.binning = options.binning
-        cfg.coverage.cnv_clustering = options.cnv_clustering
+        cfg.sequana_coverage.high_threshold = options.high_threshold
+        cfg.sequana_coverage.low_threshold = options.low_threshold
+        cfg.sequana_coverage.mixture_models = options.mixture_models
+        cfg.sequana_coverage.window_size = options.window
+        cfg.sequana_coverage.chunksize = options.chunksize
+        cfg.sequana_coverage.binning = options.binning
+        cfg.sequana_coverage.cnv_clustering = options.cnv_clustering
 
 
 
