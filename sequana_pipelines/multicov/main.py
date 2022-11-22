@@ -3,6 +3,9 @@
 #
 #  Copyright (c) 2016-2021 - Sequana Development Team
 #
+#  File author(s):
+#      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
+#
 #  Distributed under the terms of the 3-clause BSD license.
 #  The full license is in the LICENSE file, distributed with this software.
 #
@@ -10,6 +13,7 @@
 #  documentation: http://sequana.readthedocs.io
 #
 ##############################################################################
+import shutil
 import sys
 import os
 import argparse
@@ -29,7 +33,10 @@ NAME = "multicov"
 class Options(argparse.ArgumentParser):
     def __init__(self, prog=NAME, epilog=None):
         usage = col.purple(sequana_prolog.format(**{"name": NAME}))
-        super(Options, self).__init__(usage=usage, prog=prog, description="",
+        super(Options, self).__init__(
+            usage=usage,
+            prog=prog,
+            description="",
             epilog=epilog,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
@@ -70,18 +77,24 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--binning", default=-1, type=int)
         pipeline_group.add_argument("--cnv-clustering", default=-1)
 
+        self.add_argument("--run", default=False, action="store_true",
+            help="execute the pipeline directly")
+
     def parse_args(self, *args):
         args_list = list(*args)
         if "--from-project" in args_list:
-            if len(args_list)>2:
-                msg = "WARNING [sequana]: With --from-project option, " + \
-                        "pipeline and data-related options will be ignored."
+            if len(args_list) > 2:
+                msg = (
+                    "WARNING [sequana]: With --from-project option, "
+                    + "pipeline and data-related options will be ignored."
+                )
                 print(col.error(msg))
             for action in self._actions:
                 if action.required is True:
                     action.required = False
         options = super(Options, self).parse_args(*args)
         return options
+
 
 def main(args=None):
 
@@ -99,6 +112,11 @@ def main(args=None):
 
     # create the beginning of the command and the working directory
     manager.setup()
+    from sequana import logger
+
+    logger.setLevel(options.level)
+    logger.name = "sequana_rnaseq"
+    logger.info(f"#Welcome to sequana_multicov pipeline.")
 
     # fill the config file with input parameters
     if options.from_project is None:
@@ -108,12 +126,12 @@ def main(args=None):
         cfg.input_pattern = options.input_pattern
 
 
-        cfg.coverage.circular = options.circular
-        cfg.coverage.double_threshold = options.double_threshold
+        cfg.sequana_coverage.circular = options.circular
+        cfg.sequana_coverage.double_threshold = options.double_threshold
 
         if options.genbank:
             genbank = os.path.abspath(options.genbank)
-            cfg.coverage.genbank_file = genbank
+            cfg.sequana_coverage.genbank_file = genbank
             if os.path.exists(genbank):
                 shutil.copy(genbank, manager.workdir)
             else:
@@ -121,19 +139,19 @@ def main(args=None):
 
         if options.reference:
             reference = os.path.abspath(options.reference)
-            cfg.coverage.reference_file = reference
+            cfg.sequana_coverage.reference_file = reference
             if os.path.exists(reference):
                 shutil.copy(reference, manager.workdir)
             else:
                 raise IOError("{} not found".format(options.reference))
 
-        cfg.coverage.high_threshold = options.high_threshold
-        cfg.coverage.low_threshold = options.low_threshold
-        cfg.coverage.mixture_models = options.mixture_models
-        cfg.coverage.window_size = options.window
-        cfg.coverage.chunksize = options.chunksize
-        cfg.coverage.binning = options.binning
-        cfg.coverage.cnv_clustering = options.cnv_clustering
+        cfg.sequana_coverage.high_threshold = options.high_threshold
+        cfg.sequana_coverage.low_threshold = options.low_threshold
+        cfg.sequana_coverage.mixture_models = options.mixture_models
+        cfg.sequana_coverage.window_size = options.window
+        cfg.sequana_coverage.chunksize = options.chunksize
+        cfg.sequana_coverage.binning = options.binning
+        cfg.sequana_coverage.cnv_clustering = options.cnv_clustering
 
 
 
@@ -141,6 +159,9 @@ def main(args=None):
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
     manager.teardown()
+
+    if options.run:
+        subprocess.Popen(["sh", "{}.sh".format(NAME)], cwd=options.workdir)
 
 
 if __name__ == "__main__":
