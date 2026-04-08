@@ -1,0 +1,9 @@
+name: mapper
+channels:
+- conda-forge
+- bioconda
+- defaults
+dependencies:
+- pip:
+  - sequana
+  - multiqc

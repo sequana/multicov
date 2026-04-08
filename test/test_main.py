@@ -60,4 +60,4 @@ def test_check_output(tmpdir):
     cmd += f" --reference-file {reference} --circular "
     subprocess.call(cmd.split())
 
-    subprocess.call("sh multicov.sh".split(), cwd=wkdir)
+    subprocess.call("bash multicov.sh".split(), cwd=wkdir)

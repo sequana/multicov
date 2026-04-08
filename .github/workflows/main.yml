@@ -5,10 +5,11 @@ on:
     branches:
       - main
       - dev
+  workflow_dispatch:
   pull_request:
     branches-ignore: []
   schedule:
-    - cron: '0 0 1 * *'
+    - cron: '0 0 2 * *'
 
 jobs:
   build-linux:
@@ -16,46 +17,46 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python: ['3.9', '3.10', '3.11']
+        python: ['3.11', '3.12']
       fail-fast: false
-
 
     steps:
 
     - name: install graphviz
       run: |
+        sudo apt-get update -qq
         sudo apt-get install -y graphviz
 
     - name: checkout git repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Set up Python 3.X
-      uses: actions/setup-python@v2
+    - name: conda/mamba
+      uses: mamba-org/setup-micromamba@v2
       with:
-        python-version: ${{ matrix.python }}
+          environment-file: environment.yml
+          create-args: >-
+            python=${{ matrix.python }}
+          cache-environment: true
+          cache-downloads: true
 
-    - name: Add conda to system path
+    - name: install package itself
+      shell: bash -l {0}
       run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
-
-    - name: conda
-      run: |
-        conda install -c conda-forge -c bioconda --quiet -y python=${{ matrix.python }}
+        pip install .
 
     - name: Install dependencies
+      shell: bash -l {0}
       run: |
         pip install coveralls pytest-cov pytest pytest-xdist
 
-    - name: install package itself
-      run: |
-         pip install .
-
     - name: testing
+      shell: bash -l {0}
       run: |
         pytest -v --cov-report term-missing --cov=sequana_pipelines.multicov
 
     - name: coveralls
+      continue-on-error: true
+      shell: bash -l {0}
       run: |
         echo $COVERALLS_REPO_TOKEN
         coveralls --service=github
